@@ -17,6 +17,13 @@ public class DepartmentResponse {
         this.email = department.getEmail();
     }
 
+    public DepartmentResponse(Long id, String departmentName, String email, String departmentProfile) {
+        this.id = id;
+        this.departmentName = departmentName;
+        this.email = email;
+        this.departmentProfile = departmentProfile;
+    }
+
     public Long getId() {
         return id;
     }

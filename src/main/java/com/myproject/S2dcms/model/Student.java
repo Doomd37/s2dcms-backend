@@ -20,7 +20,7 @@ public class Student {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "reg_no", nullable = false, unique = true)
     private String regNo;
 
     @Column(nullable = false)

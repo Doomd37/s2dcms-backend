@@ -28,7 +28,11 @@ public class SecurityConfig {
                 .sessionManagement(sm ->
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("api/students/auth/**","api/department/auth/**","api/auth/**").permitAll()
+                        .requestMatchers("/api/students/auth/**","/api/department/auth/**","/api/auth/**").permitAll()
+                        .requestMatchers("/api/department/all").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/department/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/students/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/students/**").hasRole("STUDENT")
                         .requestMatchers("/api/department/**").hasRole("DEPARTMENT")
                         .requestMatchers("/api/user/change-password")

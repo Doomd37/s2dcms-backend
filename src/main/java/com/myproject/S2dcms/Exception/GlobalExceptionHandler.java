@@ -33,6 +33,12 @@ public class GlobalExceptionHandler {
     }
 
     // ==================== Student ====================
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<Map<String, Object>> handleRegistration(RegistrationException ex, HttpServletRequest request) {
+        logger.warn("Registration failed", ex);
+        return buildResponse(ex.getMessage(), request, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(StudentNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleStudentNotFound(StudentNotFoundException ex, HttpServletRequest request) {
         logger.warn("Student not found",ex);
@@ -104,13 +110,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmailVerificationException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailVerification(RefreshTokenException ex, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> handleEmailVerification(EmailVerificationException ex, HttpServletRequest request) {
         logger.warn("Email not verified",ex);
         return buildResponse("Email not verified", request, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler(EmailAlreadyVerifiedException.class)
-    public ResponseEntity<Map<String, Object>> handleEmailAlreadyVerified(RefreshTokenException ex, HttpServletRequest request) {
+    public ResponseEntity<Map<String, Object>> handleEmailAlreadyVerified(EmailAlreadyVerifiedException ex, HttpServletRequest request) {
         logger.warn("Email already verified",ex);
         return buildResponse("Email already verified", request, HttpStatus.UNAUTHORIZED);
     }

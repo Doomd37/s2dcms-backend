@@ -100,8 +100,6 @@ public class DepartmentService {
 
 
 
-    @Cacheable(value = "departmentMessages", key = "{#departmntEmail, #status, #sort, #pageable.pageNumber" +
-            "#pageable.pageSize}")
     public Page<MessagePreviewDto> getComplaints(
             String departmentEmail,
             String status,
@@ -149,7 +147,7 @@ public class DepartmentService {
 
     @CacheEvict(value = {
             "messagesByStudent","messageDetailsStudent",
-            "DepartmentMessages", "messageDetailsDept"
+            "messageDetailsDept"
     }, allEntries = true)
     public MessageResponse replyToComplaint(
             ReplyMessageRequest request,
@@ -188,7 +186,7 @@ public class DepartmentService {
 
     @CacheEvict(value = {
             "messagesByStudent","messageDetailsStudent",
-            "DepartmentMessages", "messageDetailsDept"
+            "messageDetailsDept"
     }, allEntries = true)
     public MessageResponse closeComplaint(Long messageId, String deptEmail) {
 

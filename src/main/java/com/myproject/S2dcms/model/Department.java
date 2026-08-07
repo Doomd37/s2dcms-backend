@@ -14,7 +14,7 @@ public class Department {
     private Long id;
 
     // -------------------- Basic Info --------------------
-    @Column(nullable = false, unique = true)
+    @Column(name = "department_name", nullable = false, unique = true)
     private String departmentName;
 
     @Column(nullable = false, unique = true)
@@ -23,11 +23,13 @@ public class Department {
     @Column(nullable = false)
     private String password;
 
-    @Column(unique = true)
+    @Column(name = "password_reset_token", unique = true)
     private String passwordResetToken;
 
+    @Column(name = "password_reset_token_expiry")
     private LocalDateTime passwordResetTokenExpiry;
 
+    @Column(name = "department_profile")
     private String departmentProfile;
 
     // -------------------- Role for JWT --------------------

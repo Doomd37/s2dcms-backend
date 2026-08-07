@@ -5,7 +5,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 public class PasswordHasher {
     public static void main(String[] args){
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String hashed = encoder.encode("statistics1");
-        System.out.println();
+        String hashed = encoder.encode("admin123");
+        System.out.println(hashed);
     }
 }

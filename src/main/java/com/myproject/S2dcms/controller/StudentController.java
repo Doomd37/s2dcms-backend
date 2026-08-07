@@ -22,15 +22,18 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
 
     private final StudentService studentService;
+    private final StudentRepo studentRepo;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, StudentRepo studentRepo) {
         this.studentService = studentService;
+        this.studentRepo = studentRepo;
     }
 
         // Registration & Email Verification
@@ -111,4 +114,26 @@ public class StudentController {
 
             return ResponseEntity.ok(response);
         }
+
+    // ==================== ADMIN ENDPOINTS ====================
+    
+    // Get all students (Admin only)
+    @GetMapping("/admin/all")
+    public ResponseEntity<List<StudentResponse>> getAllStudents() {
+        List<Student> students = studentRepo.findAll();
+        List<StudentResponse> response = students.stream()
+                .map(StudentResponse::new)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(response);
     }
+
+    // Delete a student (Admin only)
+    @DeleteMapping("/admin/{id}")
+    public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
+        if (!studentRepo.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        studentRepo.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+}

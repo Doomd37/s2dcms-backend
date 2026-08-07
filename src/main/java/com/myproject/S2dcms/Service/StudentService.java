@@ -2,6 +2,7 @@ package com.myproject.S2dcms.Service;
 
 import com.myproject.S2dcms.Exception.*;
 import com.myproject.S2dcms.dto.auth.ChangePasswordRequest;
+import com.myproject.S2dcms.dto.email.EmailMessage;
 import com.myproject.S2dcms.dto.message.MessagePreviewDto;
 import com.myproject.S2dcms.dto.message.MessageResponse;
 import com.myproject.S2dcms.dto.message.SendMessageRequest;
@@ -51,9 +52,9 @@ public class StudentService {
 
     private final FileStorageService fileStorageService;
 
-    private final MailService mailService;
+    private final EmailProducerService emailProducerService;
 
-    public StudentService(StudentRepo studentRepository, DepartmentRepo departmentRepository, MessageRepo complaintRepository, RefreshTokenRepository refreshTokenRepository, UserActionService userActionService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RefreshTokenService tokenService, FileStorageService fileStorageService, MailService mailService) {
+    public StudentService(StudentRepo studentRepository, DepartmentRepo departmentRepository, MessageRepo complaintRepository, RefreshTokenRepository refreshTokenRepository, UserActionService userActionService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RefreshTokenService tokenService, FileStorageService fileStorageService, EmailProducerService emailProducerService) {
         this.studentRepository = studentRepository;
         this.departmentRepository = departmentRepository;
         this.complaintRepository = complaintRepository;
@@ -63,7 +64,7 @@ public class StudentService {
         this.jwtUtil = jwtUtil;
         this.tokenService = tokenService;
         this.fileStorageService = fileStorageService;
-        this.mailService = mailService;
+        this.emailProducerService = emailProducerService;
     }
 
     /*
@@ -72,7 +73,11 @@ public class StudentService {
     public void register(StudentRegisterRequest dto) {
 
         if (studentRepository.findByEmailIgnoreCase(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email already exists");
+            throw new RegistrationException("Registration failed. Please check your information and try again.");
+        }
+
+        if (dto.getRegNo() == null || dto.getRegNo().trim().isEmpty()) {
+            throw new RegistrationException("Registration number is required");
         }
 
         Department department = departmentRepository.findById(dto.getDepartmentId())
@@ -95,11 +100,14 @@ public class StudentService {
 
         Student saved = studentRepository.save(student);
 
-        try {
-            mailService.sendVerificationEmail(saved.getEmail(), token);
-        } catch (ApiException e) {
-            throw new ResendVerificationException("Failed to send verification email");
-        }
+        EmailMessage emailMessage = new EmailMessage(
+            saved.getEmail(),
+            "Verify your email",
+            "VERIFICATION",
+            token,
+            saved.getName()
+        );
+        emailProducerService.sendEmailMessage(emailMessage);
 
     }
 
@@ -108,8 +116,7 @@ public class StudentService {
      */
     public void verifyEmail(String token) {
 
-        Student student = studentRepository.findByVerificationToken(token).orElseThrow(() -> new
-                RefreshTokenException("Invalid token"));
+        Student student = studentRepository.findByVerificationToken(token).orElseThrow(() -> new RefreshTokenException("Invalid token"));
 
         if (student.isEmailVerified()) {
             throw new EmailAlreadyVerifiedException("Email already verified");
@@ -148,14 +155,14 @@ public class StudentService {
 
         studentRepository.save(student);
 
-        try {
-            mailService.sendVerificationEmail(
-                    student.getEmail(),
-                    newToken
-            );
-        } catch (ApiException e) {
-            throw new ResendVerificationException("Failed to resend verification");
-        }
+        EmailMessage emailMessage = new EmailMessage(
+            student.getEmail(),
+            "Verify your email",
+            "VERIFICATION",
+            newToken,
+            student.getName()
+        );
+        emailProducerService.sendEmailMessage(emailMessage);
     }
 
 
@@ -196,22 +203,6 @@ public class StudentService {
         return new MessageResponse(complaint);
     }
 
-    /*
-       COMPLAINT HISTORY
-
-    public Page<MessagePreviewDto> getMyComplaints(
-            String email,
-            Pageable pageable
-    ) {
-
-        Student student = studentRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new StudentNotFoundException("Student not found"));
-
-        return complaintRepository
-                .findByStudentOrderBySentAtDesc(student, pageable)
-                .map(MessagePreviewDto::new);
-    }*/
-
     @CachePut(value = "messageDetailsStudent", key = "{#complaintId, #studentEmail}")
     public MessageResponse openMessage(Long complaintId, String studentEmail) {
         Message complaint = complaintRepository.findById(complaintId)
@@ -225,8 +216,6 @@ public class StudentService {
     }
 
 
-    @Cacheable(value = "messagesByStudent", key = "{#email, #status, #sort, #pageable.pageNumber," +
-            "#pageable.pageSize}")
     public Page<MessagePreviewDto> getMyComplaints(
             String email,
             String status,     // optional, ALL/PENDING/etc

@@ -31,8 +31,7 @@ public class MailService {
     // =========================
     public void sendVerificationEmail(String toEmail, String token) throws ApiException {
 
-        //String verifyLink = frontendBaseUrl + "/verify-email?token=" + token;
-        String verifyLink = "http://localhost:8080/api/students/auth/verify?token=" + token;
+        String verifyLink = frontendBaseUrl + "/verify?token=" + token;
 
         String htmlContent =
                 "<!DOCTYPE html>" +
@@ -48,7 +47,9 @@ public class MailService {
 
                         "          <tr>" +
                         "            <td align='center' style='padding:30px;'>" +
-                        "              <img src='" + frontendBaseUrl + "/logo.png' width='120' alt='S2DCMS Logo' />" +
+                        "              <div style='font-size:28px;font-weight:bold;color:#2563eb;'>" +
+                        "                🎓 S2DCMS" +
+                        "              </div>" +
                         "            </td>" +
                         "          </tr>" +
 
@@ -97,8 +98,7 @@ public class MailService {
     // =========================
     public void sendPasswordResetEmail(String toEmail, String token) throws ApiException {
 
-       // String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
-        String resetLink = "http://localhost:8080/api/students/auth/reset-password?token=" + token;
+        String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
         String htmlContent =
                 "<!DOCTYPE html>" +
                         "<html>" +
@@ -113,7 +113,9 @@ public class MailService {
 
                         "          <tr>" +
                         "            <td align='center' style='padding:30px;'>" +
-                        "              <img src='" + frontendBaseUrl + "/logo.png' width='120' alt='S2DCMS Logo' />" +
+                        "              <div style='font-size:28px;font-weight:bold;color:#2563eb;'>" +
+                        "                🎓 S2DCMS" +
+                        "              </div>" +
                         "            </td>" +
                         "          </tr>" +
 
@@ -159,8 +161,7 @@ public class MailService {
 
     public void sendDepartmentPasswordResetEmail(String toEmail, String token) throws ApiException {
 
-        // String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
-        String resetLink = "http://localhost:8080/api/department/auth//reset-password?token=" + token;
+        String resetLink = frontendBaseUrl + "/reset-password?token=" + token;
 
         String htmlContent =
                 "<!DOCTYPE html>" +
@@ -176,7 +177,9 @@ public class MailService {
 
                         "          <tr>" +
                         "            <td align='center' style='padding:30px;'>" +
-                        "              <img src='" + frontendBaseUrl + "/logo.png' width='120' alt='S2DCMS Logo' />" +
+                        "              <div style='font-size:28px;font-weight:bold;color:#2563eb;'>" +
+                        "                🎓 S2DCMS" +
+                        "              </div>" +
                         "            </td>" +
                         "          </tr>" +
 

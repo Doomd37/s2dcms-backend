@@ -5,6 +5,7 @@ import com.myproject.S2dcms.dto.auth.AuthResponse;
 import com.myproject.S2dcms.dto.auth.ChangePasswordRequest;
 import com.myproject.S2dcms.dto.auth.LoginRequest;
 import com.myproject.S2dcms.dto.auth.RefreshTokenRequest;
+import com.myproject.S2dcms.dto.email.EmailMessage;
 import com.myproject.S2dcms.dto.verification.ForgotPasswordRequest;
 import com.myproject.S2dcms.dto.verification.ResetPasswordRequest;
 import com.myproject.S2dcms.model.Department;
@@ -35,10 +36,11 @@ public class AuthService{
     private final UserActionService userActionService;
     private final PasswordEncoder passwordEncoder;
     private final TokenLimitService tokenLimitService;
-    private final MailService mailService;
+    private final EmailProducerService emailProducerService;
+    private final UserLookupService userLookupService;
 
 
-    public AuthService(RefreshTokenRepository refreshTokenRepository, RefreshTokenService tokenService, JwtUtil jwtUtil, StudentRepo studentRepository, DepartmentRepo departmentRepository, UserActionService userActionService, PasswordEncoder passwordEncoder, TokenLimitService tokenLimitService, MailService mailService) {
+    public AuthService(RefreshTokenRepository refreshTokenRepository, RefreshTokenService tokenService, JwtUtil jwtUtil, StudentRepo studentRepository, DepartmentRepo departmentRepository, UserActionService userActionService, PasswordEncoder passwordEncoder, TokenLimitService tokenLimitService, EmailProducerService emailProducerService, UserLookupService userLookupService) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.tokenService = tokenService;
         this.jwtUtil = jwtUtil;
@@ -47,52 +49,46 @@ public class AuthService{
         this.userActionService = userActionService;
         this.passwordEncoder = passwordEncoder;
         this.tokenLimitService = tokenLimitService;
-        this.mailService = mailService;
+        this.emailProducerService = emailProducerService;
+        this.userLookupService = userLookupService;
     }
 
     public AuthResponse login(LoginRequest dto) {
 
         String email = dto.getEmail();
+        UserLookupService.UserResult userResult = userLookupService.findByEmail(email);
 
-        Student student = studentRepository.findByEmailIgnoreCase(email).orElse(null);
-        Department department = null;
+        if (userResult == null) {
+            throw new InvalidPasswordException("Invalid credentials");
+        }
+
+        String rateLimitAction = userResult.userType() == UserLookupService.UserType.STUDENT 
+            ? "STUDENT_LOGIN" 
+            : "DEPARTMENT_LOGIN";
+
+        userActionService.checkRateLimit(email, rateLimitAction);
+
+        if (!passwordEncoder.matches(dto.getPassword(), userResult.getPassword())) {
+            throw new InvalidPasswordException("Invalid credentials");
+        }
+
+        if (userResult.userType() == UserLookupService.UserType.STUDENT && !userResult.getStudent().isEmailVerified()) {
+            throw new EmailVerificationException("Email not verified");
+        }
+
+        userActionService.resetRateLimit(email, rateLimitAction);
 
         String accessToken;
         RefreshToken refreshToken;
 
-        if (student != null) {
-
-            userActionService.checkRateLimit(dto.getEmail(), "STUDENT_LOGIN");
-
-            if (!passwordEncoder.matches(dto.getPassword(), student.getPassword())) {
-                throw new InvalidPasswordException("Invalid credentials");
-            }
-
-            if (!student.isEmailVerified()) {
-                throw new EmailVerificationException("Email not verified");
-            }
-
-            tokenLimitService.manageTokenLimitForStudent(student);
-
-            accessToken = jwtUtil.generateToken(student.getEmail(), student.getRole());
-            refreshToken = tokenService.createRefreshTokenForStudent(student);
-        }
-
-        else {
-
-            userActionService.checkRateLimit(dto.getEmail(), "DEPARTMENT_LOGIN");
-
-            department = departmentRepository.findByEmailIgnoreCase(email)
-                    .orElseThrow(() -> new InvalidPasswordException("Invalid credentials"));
-
-            if (!passwordEncoder.matches(dto.getPassword(), department.getPassword())) {
-                throw new InvalidPasswordException("Invalid credentials");
-            }
-
-            tokenLimitService.manageTokenLimitForDepartment(department);
-
-            accessToken = jwtUtil.generateToken(department.getEmail(), department.getRole());
-            refreshToken = tokenService.createRefreshTokenForDepartment(department);
+        if (userResult.userType() == UserLookupService.UserType.STUDENT) {
+            tokenLimitService.manageTokenLimitForStudent(userResult.getStudent());
+            accessToken = jwtUtil.generateToken(userResult.getEmail(), userResult.getRole());
+            refreshToken = tokenService.createRefreshTokenForStudent(userResult.getStudent());
+        } else {
+            tokenLimitService.manageTokenLimitForDepartment(userResult.getDepartment());
+            accessToken = jwtUtil.generateToken(userResult.getEmail(), userResult.getRole());
+            refreshToken = tokenService.createRefreshTokenForDepartment(userResult.getDepartment());
         }
 
         return new AuthResponse(accessToken, refreshToken.getToken());
@@ -143,48 +139,54 @@ public class AuthService{
         userActionService.checkRateLimit(request.getEmail(), "FORGOT_PASSWORD");
 
         String token = UUID.randomUUID().toString();
+        UserLookupService.UserResult userResult = userLookupService.findByEmail(request.getEmail());
 
-        Student student = studentRepository.findByEmailIgnoreCase(request.getEmail()).orElse(null);
+        if (userResult == null) {
+            throw new DepartmentNotFoundException("User not found");
+        }
 
-        if (student != null) {
-
+        if (userResult.userType() == UserLookupService.UserType.STUDENT) {
+            Student student = userResult.getStudent();
             student.setPasswordResetToken(token);
             student.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(24));
             studentRepository.save(student);
 
-            try {
-                mailService.sendPasswordResetEmail(student.getEmail(), token);
-            } catch (ApiException e) {
-                throw new ResendVerificationException("Failed to send password reset email");
-            }
-            return;
-        }
+            EmailMessage emailMessage = new EmailMessage(
+                student.getEmail(),
+                "Reset your password",
+                "PASSWORD_RESET_STUDENT",
+                token,
+                student.getName()
+            );
+            emailProducerService.sendEmailMessage(emailMessage);
+        } else {
+            Department department = userResult.getDepartment();
+            department.setPasswordResetToken(token);
+            department.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(24));
+            departmentRepository.save(department);
 
-        Department department = departmentRepository.findByEmailIgnoreCase(request.getEmail())
-                .orElseThrow(() -> new DepartmentNotFoundException("Department not found"));
-
-        department.setPasswordResetToken(token);
-        department.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(24));
-        departmentRepository.save(department);
-
-        try {
-            mailService.sendDepartmentPasswordResetEmail(department.getEmail(), token);
-        } catch (ApiException e) {
-            throw new ResendVerificationException("Failed to send password reset email");
+            EmailMessage emailMessage = new EmailMessage(
+                department.getEmail(),
+                "Reset your password",
+                "PASSWORD_RESET_DEPARTMENT",
+                token,
+                department.getDepartmentName()
+            );
+            emailProducerService.sendEmailMessage(emailMessage);
         }
     }
 
     public void resetPassword(ResetPasswordRequest request) {
 
         String token = request.getToken();
+        UserLookupService.UserResult userResult = userLookupService.findByPasswordResetToken(token);
 
-        /* TRY STUDENT FIRST */
-        Optional<Student> studentOpt =
-                studentRepository.findByPasswordResetToken(token);
+        if (userResult == null) {
+            throw new RefreshTokenException("Invalid token");
+        }
 
-        if (studentOpt.isPresent()) {
-
-            Student student = studentOpt.get();
+        if (userResult.userType() == UserLookupService.UserType.STUDENT) {
+            Student student = userResult.getStudent();
 
             if (student.getPasswordResetTokenExpiry() == null ||
                     student.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())) {
@@ -195,17 +197,8 @@ public class AuthService{
             student.setPasswordResetToken(null);
             student.setPasswordResetTokenExpiry(null);
             studentRepository.save(student);
-
-            return;
-        }
-
-        /* THEN TRY DEPARTMENT */
-        Optional<Department> deptOpt =
-                departmentRepository.findByPasswordResetToken(token);
-
-        if (deptOpt.isPresent()) {
-
-            Department department = deptOpt.get();
+        } else {
+            Department department = userResult.getDepartment();
 
             if (department.getPasswordResetTokenExpiry() == null ||
                     department.getPasswordResetTokenExpiry().isBefore(LocalDateTime.now())) {
@@ -216,43 +209,34 @@ public class AuthService{
             department.setPasswordResetToken(null);
             department.setPasswordResetTokenExpiry(null);
             departmentRepository.save(department);
-
-            return;
         }
-
-        throw new RefreshTokenException("Invalid token");
     }
 
 
 
     public void changePassword(String email, ChangePasswordRequest request) {
 
-        Student student = studentRepository.findByEmailIgnoreCase(email).orElse(null);
+        UserLookupService.UserResult userResult = userLookupService.findByEmail(email);
 
-        if (student != null) {
-
-            if (!passwordEncoder.matches(request.getOldPassword(), student.getPassword())) {
-                throw new InvalidPasswordException("Old password is incorrect");
-            }
-
-            student.setPassword(passwordEncoder.encode(request.getNewPassword()));
-            studentRepository.save(student);
-
-            refreshTokenRepository.deleteByStudent(student);
-            return;
+        if (userResult == null) {
+            throw new DepartmentNotFoundException("User not found");
         }
 
-        Department department = departmentRepository.findByEmailIgnoreCase(email)
-                .orElseThrow(() -> new DepartmentNotFoundException("Department not found"));
-
-        if (!passwordEncoder.matches(request.getOldPassword(), department.getPassword())) {
+        if (!passwordEncoder.matches(request.getOldPassword(), userResult.getPassword())) {
             throw new InvalidPasswordException("Old password is incorrect");
         }
 
-        department.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        departmentRepository.save(department);
-
-        refreshTokenRepository.deleteByDepartment(department);
+        if (userResult.userType() == UserLookupService.UserType.STUDENT) {
+            Student student = userResult.getStudent();
+            student.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            studentRepository.save(student);
+            refreshTokenRepository.deleteByStudent(student);
+        } else {
+            Department department = userResult.getDepartment();
+            department.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            departmentRepository.save(department);
+            refreshTokenRepository.deleteByDepartment(department);
+        }
     }
 
 
