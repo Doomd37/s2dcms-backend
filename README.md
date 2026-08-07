@@ -1,8 +1,14 @@
-# S2DCMS - Student Department Complaint Management System
+# S2DCMS Backend
 
-S2DCMS is a full-stack complaint management platform that allows students to send complaints to their department through a secure complaint system.
+Spring Boot backend API for the Student to Department Complaint Management System.
 
-The system supports authentication, complaint tracking, role-based access control, file uploads, caching, and department/student communication.
+## Related Repositories
+
+- **Frontend**: [s2dcms-frontend](https://github.com/Doomd37/s2dcms-frontend) - React frontend with Vite and Tailwind CSS
+
+## Overview
+
+This backend provides REST APIs for student and department authentication, complaint management, file uploads, and messaging with JWT-based security, Redis caching, and RabbitMQ email processing.
 
 
 # Features
@@ -51,20 +57,18 @@ The system supports authentication, complaint tracking, role-based access contro
 
 # Tech Stack
 
-## Backend
-- Java
-- Spring Boot
-- Spring Security
-- JWT
-- Spring Data JPA
-- Redis
-- Flyway
-- PostgreSQL
-
-## Frontend
-- React
-- Tailwind CSS
-- Axios
+- **Java 17+** - Programming language
+- **Spring Boot 3.x** - Application framework
+- **Spring Security** - Security framework
+- **JWT (jjwt)** - Token-based authentication
+- **Spring Data JPA** - Database ORM
+- **Hibernate** - JPA implementation
+- **PostgreSQL** - Primary database
+- **Redis** - Caching and session storage
+- **RabbitMQ** - Message queue for email processing
+- **Flyway** - Database migration
+- **Brevo API** - Email service
+- **Maven** - Build tool
 
 
 # Project Status
@@ -86,7 +90,8 @@ Completed:
 ## Clone Repository
 
 ```bash
-git clone YOUR_REPOSITORY_LINK
+git clone https://github.com/Doomd37/s2dcms-backend.git
+cd s2dcms-backend
 ```
 
 ---
@@ -120,6 +125,20 @@ Ensure Redis is running on:
 ```text
 localhost:6379
 ```
+
+Install Redis:
+- Windows: Download from [Redis official site](https://redis.io/download)
+- Mac: `brew install redis`
+- Linux: `sudo apt-get install redis-server`
+
+## Run RabbitMQ
+
+Ensure RabbitMQ is running for email processing:
+- Windows: Download from [RabbitMQ official site](https://www.rabbitmq.com/download.html)
+- Mac: `brew install rabbitmq`
+- Linux: `sudo apt-get install rabbitmq-server`
+
+Default RabbitMQ URL: `amqp://guest:guest@localhost:5672`
 
 
 ## Run Application
@@ -156,12 +175,14 @@ Maximum upload size:
 
 # Architecture Highlights
 
-- DTO-based API responses
-- Layered architecture
-- Service-oriented design
-- Redis caching strategy
-- Secure file handling
-- Role-based endpoint protection
+- **Layered Architecture**: Controller → Service → Repository pattern
+- **DTO-based API responses**: Clean separation between internal models and API contracts
+- **Service-oriented design**: Business logic encapsulated in service layer
+- **Redis caching strategy**: Token storage and session management
+- **Secure file handling**: Validation, size limits, and secure storage
+- **Role-based endpoint protection**: Spring Security with custom filters
+- **Async email processing**: RabbitMQ message queue for email operations
+- **Database migrations**: Flyway for version-controlled schema changes
 
 
 # Author
