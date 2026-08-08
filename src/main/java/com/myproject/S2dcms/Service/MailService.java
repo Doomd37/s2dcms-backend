@@ -1,7 +1,7 @@
 package com.myproject.S2dcms.Service;
 
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import sendinblue.ApiException;
 import sibApi.TransactionalEmailsApi;
 import sibModel.*;

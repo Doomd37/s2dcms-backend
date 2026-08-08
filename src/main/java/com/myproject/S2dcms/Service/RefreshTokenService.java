@@ -4,7 +4,6 @@ import com.myproject.S2dcms.model.Department;
 import com.myproject.S2dcms.model.RefreshToken;
 import com.myproject.S2dcms.model.Student;
 import com.myproject.S2dcms.repository.RefreshTokenRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
