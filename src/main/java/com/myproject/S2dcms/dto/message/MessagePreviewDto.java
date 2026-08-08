@@ -13,6 +13,12 @@ public class MessagePreviewDto {
     private boolean seenByDepartment;
     private boolean seenByStudent;
 
+    // Student info for department view
+    private String studentName;
+    private String studentEmail;
+    private String studentRegNumber;
+    private String departmentName;
+
     public MessagePreviewDto(Message message) {
         this.id = message.getId();
         this.profilePicturePath=message.getStudent().getProfileImageUrl();
@@ -23,6 +29,16 @@ public class MessagePreviewDto {
         this.sentAt = message.getSentAt();
         this.seenByDepartment = message.isSeenByDepartment();
         this.seenByStudent = message.isSeenByStudent();
+
+        if (message.getStudent() != null) {
+            this.studentName = message.getStudent().getName();
+            this.studentEmail = message.getStudent().getEmail();
+            this.studentRegNumber = message.getStudent().getRegNo();
+        }
+
+        if (message.getDepartment() != null) {
+            this.departmentName = message.getDepartment().getDepartmentName();
+        }
     }
 
     public Long getId() {
@@ -79,5 +95,37 @@ public class MessagePreviewDto {
 
     public void setSeenByStudent(boolean seenByStudent) {
         this.seenByStudent = seenByStudent;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
+    }
+
+    public String getStudentRegNumber() {
+        return studentRegNumber;
+    }
+
+    public void setStudentRegNumber(String studentRegNumber) {
+        this.studentRegNumber = studentRegNumber;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
     }
 }

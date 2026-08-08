@@ -69,14 +69,15 @@ public class DepartmentController {
 
     @PutMapping("/profile")
     public ResponseEntity<DepartmentResponse> updateProfile(
-            @RequestParam(value = "image", required = false) MultipartFile image
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "removeProfile", required = false) boolean removeProfile
     ) {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return ResponseEntity.ok(departmentService.updateProfile(email, image));
+        return ResponseEntity.ok(departmentService.updateProfile(email, image, removeProfile));
     }
 
     //  GET COMPLAINTS / MESSAGE HISTORY

@@ -257,15 +257,19 @@ public class StudentService {
     }
 
     @CacheEvict(value = "studentProfile", key = "#email")
-    public StudentResponse updateProfile(String email, StudentUpdateDto dto, MultipartFile image) {
+    public StudentResponse updateProfile(String email, StudentUpdateDto dto, MultipartFile image, boolean removeProfile) {
 
         Student student = studentRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new StudentNotFoundException("Student not found"));
 
         student.setName(dto.getName());
 
-        // ONLY IMAGE allowed here
-        if (image != null && !image.isEmpty()) {
+        // Remove profile picture if requested
+        if (removeProfile) {
+            student.setProfileImageUrl(null);
+        }
+        // Otherwise, update image if provided
+        else if (image != null && !image.isEmpty()) {
             String imageUrl = fileStorageService.storeProfileImage(image);
             student.setProfileImageUrl(imageUrl);
         }

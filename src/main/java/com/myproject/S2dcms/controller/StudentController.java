@@ -70,14 +70,15 @@ public class StudentController {
     @PutMapping("/profile")
     public ResponseEntity<StudentResponse> updateProfile(
             @ModelAttribute StudentUpdateDto dto,
-            @RequestParam(value = "image", required = false) MultipartFile image
+            @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "removeProfile", required = false) boolean removeProfile
     ) {
 
         String email = SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getName();
 
-        return ResponseEntity.ok(studentService.updateProfile(email, dto, image));
+        return ResponseEntity.ok(studentService.updateProfile(email, dto, image, removeProfile));
     }
 
         // Complaints / Messages

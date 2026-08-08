@@ -6,9 +6,10 @@
 **Authentication:** Bearer Token (JWT) - Include `Authorization: Bearer <access_token>` header for protected endpoints
 
 **Token Management:**
-- Access tokens are short-lived JWT tokens
+- Access tokens are short-lived JWT tokens (15 min expiry)
 - Refresh tokens are stored in Redis and used to obtain new access tokens
-- Refresh tokens rotate on each use and auto-clear daily
+- **Refresh Token Rotation**: Advanced session management with automatic rotation - maintains maximum 4 active sessions per user, automatically invalidating oldest tokens when new sessions are created
+- **Automated Token Cleanup**: Scheduled daily cleanup of expired and revoked tokens to optimize database performance
 - Use `/api/auth/refresh-token` to get new access tokens
 
 ---
@@ -531,7 +532,8 @@ Submit public contact message (no authentication required)
 
 ### Token Rotation
 - Refresh tokens rotate on each use (old token becomes invalid)
-- Backend automatically clears expired refresh tokens daily
+- Maximum 4 active sessions per user - oldest token invalidated when new session created
+- Backend automatically clears expired and revoked refresh tokens daily
 - Always use the latest refresh token from refresh response
 
 ### File Uploads

@@ -33,6 +33,18 @@ build/
 
 # Real Spring config
 src/main/resources/application.properties
+src/main/resources/application-*.properties
+
+# Uploads directory (if storing files locally)
+uploads/
+static/uploads/
+
+# Secrets and keys
+secrets/
+*.key
+*.pem
+*.p12
+keystore/
 
 # IntelliJ
 .idea/

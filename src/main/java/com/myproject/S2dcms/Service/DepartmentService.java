@@ -84,13 +84,17 @@ public class DepartmentService {
     }
 
     @CacheEvict(value = "departmentProfile", key = "#email")
-    public DepartmentResponse updateProfile(String email, MultipartFile image) {
+    public DepartmentResponse updateProfile(String email, MultipartFile image, boolean removeProfile) {
 
         Department department = departmentRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new StudentNotFoundException("Department not found"));
 
-        // ONLY IMAGE allowed here
-        if (image != null && !image.isEmpty()) {
+        // Remove profile picture if requested
+        if (removeProfile) {
+            department.setDepartmentProfile(null);
+        }
+        // Otherwise, update image if provided
+        else if (image != null && !image.isEmpty()) {
             String imageUrl = fileStorageService.storeProfileImage(image);
             department.setDepartmentProfile(imageUrl);
         }
@@ -179,6 +183,7 @@ public class DepartmentService {
         complaint.setAttachmentPath(attachmentPath);
         complaint.setRepliedAt(LocalDateTime.now());
         complaint.setStatus(Status.REPLIED);
+        complaint.setSeenByStudent(false); // Reset so student knows there's a new reply
 
         complaintRepository.save(complaint);
         return new MessageResponse(complaint);

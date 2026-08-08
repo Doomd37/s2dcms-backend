@@ -24,6 +24,11 @@ import java.time.LocalDateTime;
 
         // Department info for student view
         private String departmentName;
+        private String departmentEmail;
+
+        // Seen status
+        private boolean seenByDepartment;
+        private boolean seenByStudent;
 
         // Constructors
         public MessageResponse() {
@@ -41,6 +46,8 @@ import java.time.LocalDateTime;
             this.replyAttachmentPath = message.getReplyAttachmentPath();
             this.sentAt = message.getSentAt();
             this.repliedAt = message.getRepliedAt();
+            this.seenByDepartment = message.isSeenByDepartment();
+            this.seenByStudent = message.isSeenByStudent();
 
             if (message.getStudent() != null) {
                 this.studentName = message.getStudent().getName();
@@ -49,6 +56,7 @@ import java.time.LocalDateTime;
 
             if (message.getDepartment() != null) {
                 this.departmentName = message.getDepartment().getDepartmentName();
+                this.departmentEmail = message.getDepartment().getEmail();
             }
         }
 
@@ -164,5 +172,29 @@ import java.time.LocalDateTime;
 
         public void setDepartmentName(String departmentName) {
             this.departmentName = departmentName;
+        }
+
+        public String getDepartmentEmail() {
+            return departmentEmail;
+        }
+
+        public void setDepartmentEmail(String departmentEmail) {
+            this.departmentEmail = departmentEmail;
+        }
+
+        public boolean isSeenByDepartment() {
+            return seenByDepartment;
+        }
+
+        public void setSeenByDepartment(boolean seenByDepartment) {
+            this.seenByDepartment = seenByDepartment;
+        }
+
+        public boolean isSeenByStudent() {
+            return seenByStudent;
+        }
+
+        public void setSeenByStudent(boolean seenByStudent) {
+            this.seenByStudent = seenByStudent;
         }
     }

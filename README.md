@@ -14,11 +14,12 @@ This backend provides REST APIs for student and department authentication, compl
 # Features
 
 ## Authentication & Security
-- JWT Authentication
-- Access & Refresh Tokens
-- Role-Based Authorization
-- Secure Password Hashing
-- Rate Limiting Protection
+- **JWT Authentication System**: Secure token-based authentication with access and refresh tokens
+- **Refresh Token Rotation**: Advanced token management with automatic rotation - maintains maximum 4 active sessions per user, automatically invalidating oldest tokens when new sessions are created
+- **Automated Token Cleanup**: Scheduled daily cleanup of expired and revoked tokens to optimize database performance
+- **Role-Based Authorization**: Granular access control with STUDENT, DEPARTMENT, and ADMIN roles
+- **Secure Password Hashing**: BCrypt encryption for secure password storage
+- **Rate Limiting Protection**: Brute-force attack prevention with configurable attempt limits
 
 ## Student Features
 - Register & Login
@@ -43,10 +44,11 @@ This backend provides REST APIs for student and department authentication, compl
 - MIME Type Validation
 
 ## Performance & Optimization
-- Redis Caching
-- Pagination
-- Lazy Loading
-- DTO-based Responses
+- **Redis Caching**: High-performance caching for frequently accessed data
+- **Database Indexing**: Optimized database queries with strategic indexing on frequently accessed columns
+- **Pagination**: Efficient data retrieval with server-side pagination
+- **Lazy Loading**: Optimized entity loading to reduce database queries
+- **DTO-based Responses**: Clean separation between internal models and API contracts
 
 ## Database & Migration
 - PostgreSQL
@@ -175,14 +177,16 @@ Maximum upload size:
 
 # Architecture Highlights
 
-- **Layered Architecture**: Controller → Service → Repository pattern
+- **Layered Architecture**: Controller → Service → Repository pattern for clean separation of concerns
 - **DTO-based API responses**: Clean separation between internal models and API contracts
 - **Service-oriented design**: Business logic encapsulated in service layer
-- **Redis caching strategy**: Token storage and session management
+- **Redis caching strategy**: Token storage and session management for improved performance
 - **Secure file handling**: Validation, size limits, and secure storage
-- **Role-based endpoint protection**: Spring Security with custom filters
+- **Role-based endpoint protection**: Spring Security with custom JWT authentication filters
 - **Async email processing**: RabbitMQ message queue for email operations
 - **Database migrations**: Flyway for version-controlled schema changes
+- **Advanced token management**: Refresh token rotation with session limits and automated cleanup
+- **Database optimization**: Strategic indexing on frequently accessed columns for query performance
 
 
 # Author
