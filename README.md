@@ -6,6 +6,10 @@ Spring Boot backend API for the Student to Department Complaint Management Syste
 
 - **Frontend**: [s2dcms-frontend](https://github.com/Doomd37/s2dcms-frontend) - React frontend with Vite and Tailwind CSS
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+
 ## Overview
 
 This backend provides REST APIs for student and department authentication, complaint management, file uploads, and messaging with JWT-based security, Redis caching, and RabbitMQ email processing.
@@ -35,6 +39,12 @@ This backend provides REST APIs for student and department authentication, compl
 - Open Complaint Details
 - Reply to Students
 - Track Seen/Unread Messages
+- Department Profile Management
+- Close Complaints
+
+## Contact Features
+- Public Contact Form
+- Contact Message Management
 
 ## File Upload System
 - Profile Image Upload

@@ -56,4 +56,7 @@ public class UserActionLimit {
     public void setLastRequest(LocalDateTime lastRequest) {
         this.lastRequest = lastRequest;
     }
+
+    public UserActionLimit() {
+    }
 }

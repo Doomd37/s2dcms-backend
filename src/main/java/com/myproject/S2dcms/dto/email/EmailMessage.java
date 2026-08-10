@@ -6,6 +6,8 @@ public class EmailMessage {
     private String type; // VERIFICATION, PASSWORD_RESET, etc.
     private String token;
     private String name;
+    private String message;
+    private String senderEmail;
 
     public EmailMessage() {}
 
@@ -15,6 +17,25 @@ public class EmailMessage {
         this.type = type;
         this.token = token;
         this.name = name;
+    }
+
+    public EmailMessage(String to, String subject, String type, String token, String name, String message) {
+        this.to = to;
+        this.subject = subject;
+        this.type = type;
+        this.token = token;
+        this.name = name;
+        this.message = message;
+    }
+
+    public EmailMessage(String to, String subject, String type, String token, String name, String message, String senderEmail) {
+        this.to = to;
+        this.subject = subject;
+        this.type = type;
+        this.token = token;
+        this.name = name;
+        this.message = message;
+        this.senderEmail = senderEmail;
     }
 
     public String getTo() {
@@ -55,5 +76,21 @@ public class EmailMessage {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getSenderEmail() {
+        return senderEmail;
+    }
+
+    public void setSenderEmail(String senderEmail) {
+        this.senderEmail = senderEmail;
     }
 }

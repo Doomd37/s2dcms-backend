@@ -35,6 +35,10 @@ public class EmailConsumerService {
                     mailService.sendDepartmentPasswordResetEmail(emailMessage.getTo(), emailMessage.getToken());
                     logger.info("Password reset email sent to department: {}", emailMessage.getTo());
                     break;
+                case "CONTACT":
+                    mailService.sendContactEmail(emailMessage.getTo(), emailMessage.getName(), emailMessage.getSenderEmail(), emailMessage.getMessage());
+                    logger.info("Contact email sent to: {}", emailMessage.getTo());
+                    break;
                 default:
                     logger.warn("Unknown email type: {}", emailMessage.getType());
             }
