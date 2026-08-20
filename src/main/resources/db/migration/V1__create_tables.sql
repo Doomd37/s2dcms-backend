@@ -35,11 +35,11 @@ CREATE TABLE IF NOT EXISTS students (
 -- Create messages table
 CREATE TABLE IF NOT EXISTS messages (
     id BIGSERIAL PRIMARY KEY,
-    title VARCHAR(255) NOT NULL,
+    title TEXT NOT NULL,
     content TEXT NOT NULL,
-    attachment_path VARCHAR(255),
+    attachment_path TEXT,
     reply TEXT,
-    reply_attachment_path VARCHAR(255),
+    reply_attachment_path TEXT,
     status VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     student_id BIGINT NOT NULL,
     department_id BIGINT NOT NULL,

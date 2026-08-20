@@ -12,17 +12,20 @@ public class Message {
     private Long id;
 
     // -------------------- Message Content --------------------
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String title;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     // -------------------- Student attachment --------------------
+    @Column(columnDefinition = "TEXT")
     private String attachmentPath; // path to uploaded file/image by student
 
     // -------------------- Department reply --------------------
+    @Column(columnDefinition = "TEXT")
     private String reply; // text reply from department
+    @Column(columnDefinition = "TEXT")
     private String replyAttachmentPath; // optional file/image uploaded by department
 
     // -------------------- Status --------------------

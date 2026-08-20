@@ -41,6 +41,10 @@ This backend provides REST APIs for student and department authentication, compl
 - Track Seen/Unread Messages
 - Department Profile Management
 - Close Complaints
+- **AI-Powered Features**:
+  - Complaint Summarization: Auto-generate bullet point summaries
+  - Reply Suggestions: Get AI-suggested professional responses
+  - Complaint Writing Assistant: Help students write formal complaints
 
 ## Contact Features
 - Public Contact Form
@@ -54,7 +58,7 @@ This backend provides REST APIs for student and department authentication, compl
 - MIME Type Validation
 
 ## Performance & Optimization
-- **Redis Caching**: High-performance caching for frequently accessed data
+- **Redis Caching**: Configured for caching with 10-minute TTL (currently available for future use)
 - **Database Indexing**: Optimized database queries with strategic indexing on frequently accessed columns
 - **Pagination**: Efficient data retrieval with server-side pagination
 - **Lazy Loading**: Optimized entity loading to reduce database queries
@@ -80,6 +84,7 @@ This backend provides REST APIs for student and department authentication, compl
 - **RabbitMQ** - Message queue for email processing
 - **Flyway** - Database migration
 - **Brevo API** - Email service
+- **Groq AI** - AI-powered complaint summarization and reply suggestions
 - **Maven** - Build tool
 
 
@@ -95,6 +100,7 @@ Completed:
 - Redis Caching
 - Profile Management
 - Department Messaging
+- AI-Powered Features (Groq integration)
 
 
 # Setup Instructions
@@ -123,6 +129,12 @@ application-example.properties
 ```
 
 And replace placeholders with your real credentials.
+
+**Important**: Set up your Groq AI API key:
+1. Sign up at https://console.groq.com/
+2. Get your API key from the dashboard
+3. Add to application.properties: `spring.ai.openai.api-key=your_api_key_here`
+4. Set the model: `spring.ai.openai.chat.options.model=openai/gpt-oss-120b` or get any available chat model from your groq dashboard
 
 
 ## Run PostgreSQL
@@ -190,13 +202,78 @@ Maximum upload size:
 - **Layered Architecture**: Controller → Service → Repository pattern for clean separation of concerns
 - **DTO-based API responses**: Clean separation between internal models and API contracts
 - **Service-oriented design**: Business logic encapsulated in service layer
-- **Redis caching strategy**: Token storage and session management for improved performance
+- **Advanced token management**: Refresh token rotation with session limits (max 4 active sessions) and automated daily cleanup
+- **Database-based token storage**: PostgreSQL persistence for refresh tokens (survives server restarts)
+- **Database-based rate limiting**: PostgreSQL tracking of login attempts and cooldown periods
+- **Redis caching**: Configured for caching with 10-minute TTL (available for future optimization)
 - **Secure file handling**: Validation, size limits, and secure storage
 - **Role-based endpoint protection**: Spring Security with custom JWT authentication filters
 - **Async email processing**: RabbitMQ message queue for email operations
 - **Database migrations**: Flyway for version-controlled schema changes
-- **Advanced token management**: Refresh token rotation with session limits and automated cleanup
 - **Database optimization**: Strategic indexing on frequently accessed columns for query performance
+- **AI Integration**: Direct RestClient calls to Groq API for complaint summarization and reply suggestions
+
+## System Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         Frontend (React)                         │
+│                    http://localhost:5173                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │  Student     │  │  Department  │  │   Public     │          │
+│  │   Portal     │  │   Portal     │  │   Pages      │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTP/HTTPS
+                              │ JWT Auth
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Backend (Spring Boot)                         │
+│                    http://localhost:8080                         │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Security Layer (Spring Security)            │   │
+│  │  - JWT Authentication Filter                             │   │
+│  │  - Role-Based Access Control                             │   │
+│  │  - Rate Limiting                                          │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Controller Layer                             │   │
+│  │  - StudentController                                      │   │
+│  │  - DepartmentController                                   │   │
+│  │  - AIController                                           │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Service Layer                                │   │
+│  │  - AuthService                                           │   │
+│  │  - StudentService                                         │   │
+│  │  - AIComplaintService (Groq API)                          │   │
+│  │  - FileStorageService                                     │   │
+│  └──────────────────────────────────────────────────────────┘   │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │              Repository Layer (JPA)                       │   │
+│  │  - StudentRepo                                            │   │
+│  │  - DepartmentRepo                                         │   │
+│  │  - MessageRepo                                            │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+              ▼               ▼               ▼
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+│   PostgreSQL     │  │     Redis        │  │    RabbitMQ      │
+│   (Database)     │  │   (Cache)        │  │  (Email Queue)   │
+│  localhost:5432  │  │  localhost:6379  │  │  localhost:5672   │
+└──────────────────┘  └──────────────────┘  └──────────────────┘
+                              │
+                              │
+                              ▼
+                    ┌──────────────────┐
+                    │    Groq AI API   │
+                    │  (AI Services)   │
+                    └──────────────────┘
+```
 
 
 # Author

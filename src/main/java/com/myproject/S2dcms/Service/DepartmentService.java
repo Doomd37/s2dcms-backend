@@ -13,6 +13,8 @@ import com.myproject.S2dcms.dto.verification.ResetPasswordRequest;
 import com.myproject.S2dcms.model.Department;
 import com.myproject.S2dcms.model.Message;
 import com.myproject.S2dcms.model.Message.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.myproject.S2dcms.model.RefreshToken;
 import com.myproject.S2dcms.model.Student;
 import com.myproject.S2dcms.repository.DepartmentRepo;
@@ -39,6 +41,8 @@ import java.util.UUID;
 
 @Service
 public class DepartmentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DepartmentService.class);
 
     private final DepartmentRepo departmentRepository;
 
@@ -174,16 +178,25 @@ public class DepartmentService {
 
         complaint.setReply(request.getReply());
 
-        String attachmentPath = null;
+        String replyAttachmentPath = null;
 
         if (attachment != null && !attachment.isEmpty()) {
-            attachmentPath = fileStorageService.storeAttachment(attachment);
+            replyAttachmentPath = fileStorageService.storeAttachment(attachment);
         }
 
-        complaint.setAttachmentPath(attachmentPath);
+        complaint.setReplyAttachmentPath(replyAttachmentPath);
         complaint.setRepliedAt(LocalDateTime.now());
         complaint.setStatus(Status.REPLIED);
         complaint.setSeenByStudent(false); // Reset so student knows there's a new reply
+
+        // Log field lengths for debugging
+        logger.info("Saving complaint - title length: {}, content length: {}, attachmentPath length: {}, reply length: {}, replyAttachmentPath length: {}",
+            complaint.getTitle() != null ? complaint.getTitle().length() : 0,
+            complaint.getContent() != null ? complaint.getContent().length() : 0,
+            complaint.getAttachmentPath() != null ? complaint.getAttachmentPath().length() : 0,
+            complaint.getReply() != null ? complaint.getReply().length() : 0,
+            complaint.getReplyAttachmentPath() != null ? complaint.getReplyAttachmentPath().length() : 0
+        );
 
         complaintRepository.save(complaint);
         return new MessageResponse(complaint);

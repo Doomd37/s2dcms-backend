@@ -32,7 +32,7 @@ public class AIController {
             return ResponseEntity.ok(summary);
         } catch (Exception e) {
             logger.error("Error in summarize request: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().body("Error summarizing complaint: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Failed to generate summary. Please try again later.");
         }
     }
 
@@ -48,7 +48,7 @@ public class AIController {
             return ResponseEntity.ok(reply);
         } catch (Exception e) {
             logger.error("Error in suggest-reply request: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().body("Error suggesting reply: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Failed to generate reply suggestion. Please try again later.");
         }
     }
 
@@ -64,7 +64,7 @@ public class AIController {
             return ResponseEntity.ok(complaint);
         } catch (Exception e) {
             logger.error("Error in write-complaint request: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().body("Error writing complaint: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Failed to generate complaint. Please try again later.");
         }
     }
 }

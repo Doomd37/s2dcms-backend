@@ -56,8 +56,7 @@ public class DepartmentController {
                     .collect(Collectors.toList());
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to fetch departments: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch departments. Please try again later.");
         }
     }
 

@@ -95,9 +95,11 @@ public class AIComplaintService {
         try {
             logger.info("Starting AI complaint writing for situation: {}", situation);
             String systemPrompt = "You are a helpful assistant that helps students write complaints. " +
-                    "Based on the student's described situation, write a concise, direct complaint " +
-                    "that clearly states the issue. Keep it brief (1-2 paragraphs max), no letter format, " +
-                    "no placeholders like [Your Name], just the actual complaint text.";
+                    "Based on the student's described situation, provide a response in this exact format:\n" +
+                    "TITLE: [a short, meaningful title for the complaint - max 10 words]\n" +
+                    "CONTENT: [a concise, direct complaint that clearly states the issue - 1-2 paragraphs max, no letter format]. " +
+                    "Use placeholders like [Course Name] and [Year] for course-specific information instead of guessing. " +
+                    "Do not use placeholders like [Your Name] or other personal information.";
 
             String userPrompt = "Write a complaint about this situation:\n\n" + situation;
 
