@@ -4,7 +4,7 @@ Spring Boot backend API for the Student to Department Complaint Management Syste
 
 ## Related Repositories
 
-- **Frontend**: [s2dcms-frontend](https://github.com/Doomd37/s2dcms-frontend) - React frontend with Vite and Tailwind CSS
+- **Frontend**: [s2dcms-frontend](https://github.com/emmanuel-40/s2dcms-frontend) - React frontend with Vite and Tailwind CSS
 
 ## License
 
@@ -108,7 +108,7 @@ Completed:
 ## Clone Repository
 
 ```bash
-git clone https://github.com/Doomd37/s2dcms-backend.git
+git clone https://github.com/emmanuel-40/s2dcms-backend.git
 cd s2dcms-backend
 ```
 
